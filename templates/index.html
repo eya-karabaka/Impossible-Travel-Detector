@@ -1,8 +1,8 @@
-<!DOCTYPE html> 
-<html> 
+<!DOCTYPE html>
+<html>
 
-<head> 
-    <title>Impossible Travel Detector</title> 
+<head>
+    <title>Impossible Travel Detector</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body {
@@ -52,6 +52,8 @@
             border-radius: 10px;
             margin-bottom: 30px;
             width: 400px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         h2 {
@@ -61,7 +63,7 @@
 
         input {
             display: block;
-            width: 100%;
+            width: calc(100% - 20px);
             padding: 10px;
             margin-bottom: 10px;
             background-color: #0f0f1a;
@@ -99,7 +101,7 @@
         </form>
     </div>
 
-    {% if alerts %} 
+    {% if alerts %}
     <table>
         <tr>
             <th>User</th>
@@ -110,7 +112,7 @@
             <th>Speed</th>
             <th>Status</th>
         </tr>
-        {% for alert in alerts %} 
+        {% for alert in alerts %}
         <tr>
             <td>{{ alert.user }}</td>
             <td>{{ alert.from }}</td>
@@ -118,9 +120,9 @@
             <td>{{ alert.distance_km }} km</td>
             <td>{{ alert.time_hours }} hrs</td>
             <td>{{ alert.speed_kmh }} km/h</td>
-            <td><span class="badge">⚠ FLAGGED</span></td> 
+            <td><span class="badge">⚠ FLAGGED</span></td>
         </tr>
-        {% endfor %} 
+        {% endfor %}
     </table>
     {% else %}
     <p>No suspicious logins detected.</p>
