@@ -1,0 +1,157 @@
+<!DOCTYPE html> 
+<html> 
+
+<head> 
+    <title>Impossible Travel Detector</title> 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            background-color: #0f0f1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #ff4d6d;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th {
+            background-color: #1e1e2e;
+            padding: 12px;
+            text-align: left;
+            color: #ff4d6d;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #2a2a3e;
+        }
+
+        tr:hover {
+            background-color: #1e1e2e;
+        }
+
+        .badge {
+            background-color: #ff4d6d;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .form-container {
+            background-color: #1e1e2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            width: 400px;
+        }
+
+        h2 {
+            color: #ff4d6d;
+            margin-bottom: 15px;
+        }
+
+        input {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #0f0f1a;
+            border: 1px solid #2a2a3e;
+            border-radius: 5px;
+            color: white;
+        }
+
+        button {
+            background-color: #ff4d6d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #e63950;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🚨 Impossible Travel Detector</h1>
+    <p>Flagged logins that are geographically impossible</p>
+    <div class="form-container">
+        <h2>Submit a Login Event</h2>
+        <form action="/add" method="POST">
+            <input type="text" name="user" placeholder="Username" required />
+            <input type="text" name="ip" placeholder="IP Address" required />
+            <input type="datetime-local" name="timestamp" required />
+            <button type="submit">Add Login</button>
+        </form>
+    </div>
+
+    {% if alerts %} 
+    <table>
+        <tr>
+            <th>User</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Distance</th>
+            <th>Time</th>
+            <th>Speed</th>
+            <th>Status</th>
+        </tr>
+        {% for alert in alerts %} 
+        <tr>
+            <td>{{ alert.user }}</td>
+            <td>{{ alert.from }}</td>
+            <td>{{ alert.to }}</td>
+            <td>{{ alert.distance_km }} km</td>
+            <td>{{ alert.time_hours }} hrs</td>
+            <td>{{ alert.speed_kmh }} km/h</td>
+            <td><span class="badge">⚠ FLAGGED</span></td> 
+        </tr>
+        {% endfor %} 
+    </table>
+    {% else %}
+    <p>No suspicious logins detected.</p>
+    {% endif %}
+    <div id="map" style="height: 500px; margin-top: 40px; border-radius: 10px;"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([20, 0], 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: 'OpenStreetMap'
+        }).addTo(map);
+
+        var alerts = {{ alerts | tojson }};
+
+        alerts.forEach(function (alert) {
+            L.marker([alert.from_lat, alert.from_lon])
+                .addTo(map)
+                .bindPopup(alert.user + " logged in from " + alert.from);
+
+            L.marker([alert.to_lat, alert.to_lon])
+                .addTo(map)
+                .bindPopup(alert.user + " then appeared in " + alert.to);
+
+            L.polyline(
+                [[alert.from_lat, alert.from_lon], [alert.to_lat, alert.to_lon]],
+                { color: 'red', weight: 2, dashArray: '6, 6' }
+            ).addTo(map);
+        });
+    </script>
+</body>
+
+</html>
